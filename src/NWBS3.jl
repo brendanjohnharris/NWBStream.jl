@@ -10,18 +10,17 @@ const h5py = PythonCall.pynew()
 const fsspec_cached = PythonCall.pynew()
 const dandiapi = PythonCall.pynew()
 
+# Create the file cache
+artifact_toml = abspath(joinpath(@__DIR__, "../Artifacts.toml"))
+cachehash = artifact_hash("cache", artifact_toml)
+if isnothing(cachehash) || !artifact_exists(cachehash)
+    cachehash = create_artifact() do artifact_dir
+        mkpath(artifact_dir)
+    end
+    bind_artifact!(artifact_toml, "cache", cachehash)
+end
 
 function __init__()
-    # Create the file cache
-    artifact_toml = joinpath(@__DIR__, "Artifacts.toml")
-    cachehash = artifact_hash("cache", artifact_toml)
-    if isnothing(cachehash) || !artifact_exists(cachehash)
-        cachehash = create_artifact() do artifact_dir
-            mkpath(artifact_dir)
-        end
-        bind_artifact!(artifact_toml, "cache", cachehash)
-    end
-
     PythonCall.pycopy!(pynwb, pyimport("pynwb"))
     PythonCall.pycopy!(dandi, pyimport("dandi"))
     PythonCall.pycopy!(fsspec, pyimport("fsspec"))
