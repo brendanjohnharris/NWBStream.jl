@@ -10,4 +10,6 @@
 /docs/build/
 data/**
 docs/build/
-docs/site/, LocalPreferences.toml
+docs/site/
+LocalPreferences.toml
+.CondaPkg/
