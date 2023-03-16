@@ -13,3 +13,4 @@ docs/build/
 docs/site/
 LocalPreferences.toml
 .CondaPkg/
+Artifacts.toml

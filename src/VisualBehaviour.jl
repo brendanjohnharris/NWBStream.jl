@@ -5,11 +5,20 @@ using DataFrames
 
 const visualbehaviour = "https://visual-behavior-neuropixels-data.s3.us-west-2.amazonaws.com"
 
-function getsessions(hostname=visualbehaviour)
+function getsessiontable(hostname=visualbehaviour)
     url = visualbehaviour*"/visual-behavior-neuropixels/project_metadata/ecephys_sessions.csv"
     sessions = take!(Downloads.download(url, IOBuffer()))
     mat = readdlm(sessions, ',')
     return DataFrame(mat[2:end, :], mat[1, :])
+end
+
+function getprobes(hostname=visualbehaviour)
+
+end
+function getchannels()
+end
+
+function getsessiondata()
 end
 
 # * The goal is now to copy all of the convenience functions in AllenAttention.jl to here...
