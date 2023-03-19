@@ -1,3 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 NWBS3 = "5982c9a4-5774-4415-9796-801a4f82b4d6"
+OhMyREPL = "5fb14364-9ced-5910-84b2-373655c76a03"
+PkgTemplates = "14b8a8f1-9102-5b29-a752-f990bacb7fe1"
+Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"

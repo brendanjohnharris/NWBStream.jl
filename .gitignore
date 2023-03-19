@@ -6,11 +6,10 @@
 *.jld2
 *.mat
 *.parquet
-/Manifest.toml
-/docs/build/
-data/**
+Manifest.toml
 docs/build/
 docs/site/
+data/**
 LocalPreferences.toml
 .CondaPkg/
 Artifacts.toml
