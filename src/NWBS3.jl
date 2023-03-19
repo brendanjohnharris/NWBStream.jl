@@ -1,6 +1,11 @@
 module NWBS3
 using PythonCall
 using Pkg.Artifacts
+using DataFrames
+using Downloads
+using DelimitedFiles
+
+export cachefs, dandiurl, s3open, url2df
 
 
 const pynwb = PythonCall.pynew()
@@ -29,14 +34,32 @@ function __init__()
     PythonCall.pycopy!(dandiapi, pyimport("dandi.dandiapi"))
 end
 
-function cachefs()
+"""
+    cachefs(protocol::String="http") -> CachingFileSystem
+
+Create a caching file system object using `fsspec_cached.CachingFileSystem`.
+The `protocol` argument sets the underlying file system protocol to be used and is set to `"http"` by default.
+
+Returns a new `CachingFileSystem` object that can be used for reading and writing files from the specified file system.
+"""
+function cachefs(protocol="http")
     CachingFileSystem = fsspec_cached.CachingFileSystem
     CachingFileSystem(
-        fs=fsspec.filesystem("http"),
+        fs=fsspec.filesystem(protocol),
         cache_storage=artifact"cache",  # Local folder for the cache
     )
 end
 
+"""
+    dandiurl(dandiset_id::String="000006", filepath::String="sub-anm372795/sub-anm372795_ses-20170718.nwb"; version::Union{Nothing, String}=nothing) -> String
+
+Returns the S3 URL of a file in a DANDI dataset.
+
+## Arguments
+- `dandiset_id`: The ID of the DANDI dataset.
+- `filepath`: The path of the file within the DANDI dataset.
+- `version`: The version of the file. If nothing, the latest version is used.
+"""
 function dandiurl(dandiset_id="000006", filepath="sub-anm372795/sub-anm372795_ses-20170718.nwb"; version=nothing)
     client = dandiapi.DandiAPIClient()
     if isnothing(version)
@@ -48,6 +71,21 @@ function dandiurl(dandiset_id="000006", filepath="sub-anm372795/sub-anm372795_se
     return s3_url
 end
 
+"""
+    s3open(s3_url::AbstractString, mode::AbstractString="rb") -> Any
+
+Open a file from an S3 URL.
+
+## Arguments
+- `s3_url::AbstractString`: The S3 URL of the file.
+- `mode::AbstractString="rb"`: The access mode. Default is read-only in binary mode.
+
+## Examples
+```julia
+s3_url = dandiurl()
+data = s3open(s3_url)
+```
+"""
 function s3open(s3_url, mode="rb")
     f = cachefs().open(s3_url, mode)
     file = h5py.File(f)
@@ -55,5 +93,21 @@ function s3open(s3_url, mode="rb")
     return io.read()
 end
 
+"""
+    url2df(url::AbstractString) -> DataFrame
+
+Convert the data from an online CSV file to a `DataFrame`.
+
+## Arguments
+- `url::AbstractString`: The URL of the CSV file.
+
+"""
+function url2df(url::AbstractString)
+    csv = take!(Downloads.download(url, IOBuffer()))
+    mat = readdlm(csv, ',')
+    return DataFrame(mat[2:end, :], mat[1, :])
+end
+
+include("./Session.jl")
 
 end
