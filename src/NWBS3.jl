@@ -5,7 +5,7 @@ using DataFrames
 using Downloads
 using DelimitedFiles
 
-export cachefs, dandiurl, s3open, url2df
+export cachefs, s3open, s3close, url2df
 
 
 const pynwb = PythonCall.pynew()
@@ -48,17 +48,21 @@ end
 
 
 """
-    s3open(s3_url::AbstractString, mode::AbstractString="rb") -> Any
+    s3open(s3_url::AbstractString, mode::AbstractString="rb") -> file, io
 
 Open a file from an S3 URL.
 
-## Arguments
+## Input arguments
 - `s3_url::AbstractString`: The S3 URL of the file.
 - `mode::AbstractString="rb"`: The access mode. Default is read-only in binary mode.
 
+## Output arguments
+- `file`: A file-like NWB object
+- `io`: The io stream to the file. This should be `io.close()`d before exiting Julia.
+
 ## Examples
 ```julia
-s3_url = dandiurl()
+s3_url = "https://visual-behavior-neuropixels-data.s3.us-west-2.amazonaws.com/visual-behavior-neuropixels/behavior_ecephys_sessions/1044385384/ecephys_session_1044385384.nwb"
 data = s3open(s3_url)
 ```
 """
@@ -66,8 +70,10 @@ function s3open(s3_url, mode="rb")
     f = cachefs().open(s3_url, mode)
     file = h5py.File(f)
     io = pynwb.NWBHDF5IO(; file=file, load_namespaces=true)
-    return io.read()
+    return io.read(), io
 end
+
+s3close(io) = io.close()
 
 """
     url2df(url::AbstractString) -> DataFrame
