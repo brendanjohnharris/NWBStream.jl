@@ -1,5 +1,4 @@
 [deps]
-dandi = ""
 aiohttp = ""
 pynwb = ""
 h5py = ""
