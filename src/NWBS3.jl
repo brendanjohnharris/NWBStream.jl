@@ -75,6 +75,9 @@ end
 
 s3close(io) = io.close()
 
+s3clear() = display(Base.@locals) # Get a list of all variables. This manages to solve the segfault. Don't ask me how the world works
+export s3clear
+
 """
     url2df(url::AbstractString) -> DataFrame
 
