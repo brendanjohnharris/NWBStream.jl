@@ -1,4 +1,4 @@
-using NWBS3
+using NWBStream
 using Test
 
 @testset "Visual Behaviour" begin

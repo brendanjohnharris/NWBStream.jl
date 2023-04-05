@@ -1,4 +1,4 @@
-name = "NWBS3"
+name = "NWBStream"
 uuid = "5982c9a4-5774-4415-9796-801a4f82b4d6"
 authors = ["brendanjohnharris <brendanjohnharris@gmail.com> and contributors"]
 version = "0.1.0"

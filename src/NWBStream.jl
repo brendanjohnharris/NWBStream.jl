@@ -1,4 +1,4 @@
-module NWBS3
+module NWBStream
 using PythonCall
 using Pkg.Artifacts
 using DataFrames

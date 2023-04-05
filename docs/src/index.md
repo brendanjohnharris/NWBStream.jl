@@ -1,14 +1,14 @@
 ```@meta
-CurrentModule = NWBS3
+CurrentModule = NWBStream
 ```
 
-# NWBS3
+# NWBStream
 
-Documentation for [NWBS3](https://github.com/brendanjohnharris/NWBS3.jl).
+Documentation for [NWBStream](https://github.com/brendanjohnharris/NWBStream.jl).
 
 ```@index
 ```
 
 ```@autodocs
-Modules = [NWBS3]
+Modules = [NWBStream]
 ```

@@ -1,13 +1,13 @@
-using NWBS3
+using NWBStream
 using Documenter
 
-DocMeta.setdocmeta!(NWBS3, :DocTestSetup, :(using NWBS3); recursive=true)
+DocMeta.setdocmeta!(NWBStream, :DocTestSetup, :(using NWBStream); recursive=true)
 
 makedocs(;
-    modules=[NWBS3],
+    modules=[NWBStream],
     authors="brendanjohnharris <brendanjohnharris@gmail.com> and contributors",
-    repo="https://github.com/brendanjohnharris/NWBS3.jl/blob/{commit}{path}#{line}",
-    sitename="NWBS3.jl",
+    repo="https://github.com/brendanjohnharris/NWBStream.jl/blob/{commit}{path}#{line}",
+    sitename="NWBStream.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         edit_link="main",
@@ -19,5 +19,5 @@ makedocs(;
 )
 
 deploydocs(
-    repo = "github.com/brendanjohnharris/NWBS3.jl.git",
+    repo = "github.com/brendanjohnharris/NWBStream.jl.git",
 )
