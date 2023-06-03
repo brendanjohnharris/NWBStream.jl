@@ -22,7 +22,6 @@ if isnothing(cachehash) || !artifact_exists(cachehash)
     end
     bind_artifact!(artifact_toml, "cache", cachehash)
 end
-
 function __init__()
     PythonCall.pycopy!(pynwb, pyimport("pynwb"))
     PythonCall.pycopy!(fsspec, pyimport("fsspec"))
@@ -38,14 +37,25 @@ The `protocol` argument sets the underlying file system protocol to be used and 
 
 Returns a new `CachingFileSystem` object that can be used for reading and writing files from the specified file system.
 """
-function cachefs(protocol="http")
-    CachingFileSystem = fsspec_cached.CachingFileSystem
-    CachingFileSystem(
-        fs=fsspec.filesystem(protocol),
-        cache_storage=artifact"cache",  # Local folder for the cache
-    )
+function cachefs(protocol=nothing, stream=true)
+    # CachingFileSystem = fsspec_cached.CachingFileSystem
+    # CachingFileSystem(
+    #     fs=fsspec.filesystem(protocol),
+    #     cache_storage=artifact"cache", same_names=true # Local folder for the cache
+    # )
+    # f = fsspec.filesystem("http", cache_type=BlockCache)
+    # fsspec.filesystem("blockcache", target_protocol="http",cache_storage=artifact"cache")
+    if isnothing(protocol) && haskey(ENV, "AWS_ACCESS_KEY_ID") && haskey(ENV, "AWS_SECRET_ACCESS_KEY")
+        protocol = "s3"
+    elseif isnothing(protocol)
+        protocol = "http"
+    end
+    if stream
+        fsspec.implementations.cached.CachingFileSystem(fs=fsspec.filesystem(protocol), cache_storage=artifact"cache", expiry_time=false, check_files=false, compression="None", same_names=true)
+    else
+        fsspec.filesystem("filecache", target_protocol=protocol,cache_storage=artifact"cache")
+    end
 end
-
 
 """
     s3open(s3_url::AbstractString, mode::AbstractString="rb") -> file, io
@@ -67,7 +77,18 @@ data = s3open(s3_url)
 ```
 """
 function s3open(s3_url, mode="rb")
-    f = cachefs().open(s3_url, mode)
+    # f = cachefs().open(s3_url, mode)
+    cache = cachefs()
+    f = cache.open(s3_url, mode)
+
+    if pyconvert(String, cache.protocol) == "http"
+        D, localpath = url |> cache._strip_protocol |> cache._check_file
+        D = pyconvert(Dict, D)
+        if isempty(D["blocks"]) # Re-dowload the file
+            @warn "Blocks empty"
+        end
+    end
+
     file = h5py.File(f)
     io = pynwb.NWBHDF5IO(; file=file, load_namespaces=true)
     return io.read(), io
