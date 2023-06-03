@@ -51,7 +51,7 @@ function cachefs(protocol=nothing, stream=true)
         protocol = "http"
     end
     if stream
-        fsspec.implementations.cached.CachingFileSystem(fs=fsspec.filesystem(protocol), cache_storage=artifact"cache", expiry_time=false, check_files=false, compression="None", same_names=true)
+        fsspec.implementations.cached.CachingFileSystem(fs=fsspec.filesystem(protocol), cache_storage=artifact"cache", expiry_time=false, check_files=false, compression=nothing, same_names=true)
     else
         fsspec.filesystem("filecache", target_protocol=protocol,cache_storage=artifact"cache")
     end
@@ -82,7 +82,7 @@ function s3open(s3_url, mode="rb")
     f = cache.open(s3_url, mode)
 
     if pyconvert(String, cache.protocol) == "http"
-        D, localpath = url |> cache._strip_protocol |> cache._check_file
+        D, localpath = s3_url |> cache._strip_protocol |> cache._check_file
         D = pyconvert(Dict, D)
         if isempty(D["blocks"]) # Re-dowload the file
             @warn "Blocks empty"
