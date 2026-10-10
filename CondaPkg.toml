@@ -1,7 +1,6 @@
 [deps]
 aiohttp = ""
 fsspec = ""
-gcc = ">=12.1.0"
 requests = ""
 python = "<3.11"
 
