@@ -80,15 +80,6 @@ function s3open(s3_url, mode="rb")
     # f = cachefs().open(s3_url, mode)
     cache = cachefs()
     f = cache.open(s3_url, mode)
-
-    if pyconvert(String, cache.protocol) == "http"
-        D, localpath = s3_url |> cache._strip_protocol |> cache._check_file
-        D = pyconvert(Dict, D)
-        if isempty(D["blocks"]) # Re-download the file
-            @warn "Blocks empty"
-        end
-    end
-
     file = h5py.File(f)
     io = pynwb.NWBHDF5IO(; file=file, load_namespaces=true)
     return io.read(), io
