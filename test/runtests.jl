@@ -11,7 +11,7 @@ end
 
 
 @testset "Test cacher" begin
-    cache = artifact"cache"
+    cache = artifact_path(NWBStream.cachehash) # artifact"cache" stops searching at test/Project.toml
     for f in readdir(cache)
         rm(joinpath(cache, f))
     end
