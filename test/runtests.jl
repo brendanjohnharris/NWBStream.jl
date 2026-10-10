@@ -3,6 +3,13 @@ using PythonCall
 using Test
 using Pkg.Artifacts
 
+cache = artifact_path(NWBStream.cachehash) # artifact"cache" stops searching at test/Project.toml
+function clearcache() # removing the files alone leaves stale block metadata in the live filesystem
+    foreach(rm, readdir(cache; join = true))
+    NWBStream.cachefs().load_cache()
+end
+clearcache()
+
 @testset "Visual Behaviour" begin
     url = "https://visual-behavior-neuropixels-data.s3.us-west-2.amazonaws.com/visual-behavior-neuropixels/behavior_ecephys_sessions/1044385384/ecephys_session_1044385384.nwb"
     file, io = s3open(url)
@@ -12,10 +19,7 @@ end
 
 
 @testset "Test cacher" begin
-    cache = artifact_path(NWBStream.cachehash) # artifact"cache" stops searching at test/Project.toml
-    for f in readdir(cache)
-        rm(joinpath(cache, f))
-    end
+    clearcache()
     url = "https://visual-behavior-neuropixels-data.s3.us-west-2.amazonaws.com/visual-behavior-neuropixels/behavior_ecephys_sessions/1044385384/probe_probeB_lfp.nwb"
 
     (file, io), t = @timed s3open(url)
