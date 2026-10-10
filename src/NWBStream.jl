@@ -4,6 +4,7 @@ using Pkg.Artifacts
 using DataFrames
 using Downloads
 using DelimitedFiles
+using NetworkOptions
 
 export cachefs, s3open, s3close, url2df
 
@@ -12,6 +13,7 @@ const pynwb = PythonCall.pynew()
 const fsspec = PythonCall.pynew()
 const h5py = PythonCall.pynew()
 const fsspec_cached = PythonCall.pynew()
+const sslcontext = PythonCall.pynew()
 
 # Create the file cache
 artifact_toml = abspath(joinpath(@__DIR__, "../Artifacts.toml"))
@@ -27,6 +29,8 @@ function __init__()
     PythonCall.pycopy!(fsspec, pyimport("fsspec"))
     PythonCall.pycopy!(h5py, pyimport("h5py"))
     PythonCall.pycopy!(fsspec_cached, pyimport("fsspec.implementations.cached"))
+    # From Julia 1.12, Python's ssl binds to Julia's OpenSSL, whose default CA path does not exist
+    PythonCall.pycopy!(sslcontext, pyimport("ssl").create_default_context(cafile = NetworkOptions.ca_roots_path()))
 end
 
 """
@@ -50,10 +54,11 @@ function cachefs(protocol=nothing, stream=true)
     elseif isnothing(protocol)
         protocol = "http"
     end
+    opts = protocol == "http" ? (; ssl = sslcontext) : (;)
     if stream
-        fsspec.implementations.cached.CachingFileSystem(fs=fsspec.filesystem(protocol), cache_storage=artifact"cache", expiry_time=false, check_files=false, compression=nothing, same_names=true)
+        fsspec.implementations.cached.CachingFileSystem(fs=fsspec.filesystem(protocol; opts...), cache_storage=artifact"cache", expiry_time=false, check_files=false, compression=nothing, same_names=true)
     else
-        fsspec.filesystem("filecache", target_protocol=protocol, cache_storage=artifact"cache")
+        fsspec.filesystem("filecache", target_protocol=protocol, target_options=pydict(; opts...), cache_storage=artifact"cache")
     end
 end
 
