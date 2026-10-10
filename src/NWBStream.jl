@@ -87,10 +87,11 @@ function s3open(s3_url, mode="rb")
     f = cache.open(s3_url, mode)
     file = h5py.File(f)
     io = pynwb.NWBHDF5IO(; file=file, load_namespaces=true)
+    pysetattr(io, "_s3file", f) # closing io leaves f open
     return io.read(), io
 end
 
-s3close(io) = io.close()
+s3close(io) = (io.close(); pyhasattr(io, "_s3file") && io._s3file.close(); nothing)
 
 s3clear() = display(Base.@locals) # Get a list of all variables. This manages to solve the segfault. Don't ask me how the world works
 export s3clear

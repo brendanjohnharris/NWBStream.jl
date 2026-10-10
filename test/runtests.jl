@@ -7,6 +7,7 @@ using Pkg.Artifacts
     url = "https://visual-behavior-neuropixels-data.s3.us-west-2.amazonaws.com/visual-behavior-neuropixels/behavior_ecephys_sessions/1044385384/ecephys_session_1044385384.nwb"
     file, io = s3open(url)
     s3close(io)
+    @test pyconvert(Bool, io._s3file.closed) # an open handle locks the cache file on Windows
 end
 
 
